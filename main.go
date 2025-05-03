@@ -111,6 +111,6 @@ func main() {
 
 	if err != nil {
 
-		println("Error exporting:", err.Error())
+		println("Error exporting:", err)
 	}
 }
