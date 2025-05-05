@@ -23,7 +23,6 @@ func printUsage() {
 
 func writePanicHeader(f *os.File) {
 
-	fmt.Fprintln(f, "_effectNone = &00")
 	fmt.Fprintln(f, "_effectStars = &10")
 	fmt.Fprintln(f, "_effectPaletteChange = &20 ; change to red for hell")
 	fmt.Fprintln(f, "_effectPaletteChange2 = &40 ; change to magenta for catacombs area")
@@ -165,6 +164,7 @@ func exportMap(mapfile string, outfile string, packed bool) error {
 
 				for _, k := range packedRowBytes {
 
+					// TODO: OR _bitCollidable etc when required
 					outputStr += fmt.Sprintf("&%02X,", k)
 				}
 
