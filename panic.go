@@ -8,7 +8,7 @@ import "errors"
 // The return slice is a variable length packed in the "Mountain Panic" format:
 // First byte is a control byte, with each bit set meaning a tile is present in that slot on the row.
 // Following this, either a run length byte:
-//                 0xf0 - Rest of the line is the same repeated tile, which follows this byte
+//                 0xf0 - TODO (if needed) Rest of the line is the same repeated tile, which follows this byte
 //                 0xfn - The next tile is repeated n times (n = 0-15)
 // Or a normal tile index:
 //                 0x00 - 0x1f
