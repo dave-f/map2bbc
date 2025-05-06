@@ -100,6 +100,19 @@ func exportMap(mapfile string, outfile string, packed bool) error {
 			return err
 		}
 
+		// TODO
+		if packed {
+
+			/*
+				err = panicParseTileFlags(worldPath + "/" + tilemap.TileSet.Source)
+
+				if err != nil {
+
+					return err
+				}
+			*/
+		}
+
 		fmt.Fprintf(f, ".screen%dData:\n", i)
 
 		// The CSV reader expects no ',' at the end of a line, so remove those
@@ -127,6 +140,13 @@ func exportMap(mapfile string, outfile string, packed bool) error {
 
 			if packed {
 
+				for i, j := range rowBytes {
+
+					// or in the flags?
+					flags := panicGetFlagsForTile(j)
+					rowBytes[i] |= flags
+				}
+
 				packedRowBytes, err := packLine(rowBytes)
 
 				if err != nil {
@@ -136,7 +156,6 @@ func exportMap(mapfile string, outfile string, packed bool) error {
 
 				for _, k := range packedRowBytes {
 
-					// TODO: OR _bitCollidable etc when required
 					outputStr += fmt.Sprintf("&%02X,", k)
 				}
 

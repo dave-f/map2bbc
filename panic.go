@@ -1,10 +1,54 @@
 package main
 
 import (
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"os"
 )
+
+// map of TILEID to int (flags) ?
+
+const _bitClimbable = 0x80
+const _bitCollidable = 0x40
+const _bitHookable = 0x20
+
+func panicParseTileFlags(filename string) error {
+
+	fileBytes, err := os.ReadFile(filename)
+
+	if err != nil {
+
+		return err
+	}
+
+	var ts TileSet
+	err = xml.Unmarshal(fileBytes, &ts)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+// Get the flags for this tile type
+
+func panicGetFlagsForTile(tileID byte) byte {
+
+	// Just for now, these are eventually read out of the files above
+	if tileID == 1 {
+
+		return _bitClimbable
+	} else if tileID == 3 {
+
+		return _bitCollidable
+	} else {
+
+		return 0
+	}
+}
 
 // Pack a row of screen bytes
 // It is expected the slice passed in has 8 bytes in it.
@@ -56,10 +100,7 @@ loop:
 		idx++
 	}
 
-	if rleCnt > 1 {
-
-		idx++
-	}
+	idx++
 
 	// If we have an RLE count of 1 or 2, just output the bytes
 	if rleCnt < 3 {
@@ -70,11 +111,6 @@ loop:
 
 				r = append(r, currentByte)
 			}
-		}
-
-		if rleCnt == 1 {
-
-			idx++
 		}
 	} else {
 
