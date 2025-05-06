@@ -1,6 +1,10 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"os"
+)
 
 // Pack a row of screen bytes
 // It is expected the slice passed in has 8 bytes in it.
@@ -85,4 +89,32 @@ loop:
 	}
 
 	return r, nil
+}
+
+func writePanicHeader(f *os.File) {
+
+	fmt.Fprintln(f, "_effectStars = &10")
+	fmt.Fprintln(f, "_effectPaletteChange = &20 ; change to red for hell")
+	fmt.Fprintln(f, "_effectPaletteChange2 = &40 ; change to magenta for catacombs area")
+	fmt.Fprintln(f, "_effectGems = &80 ; read inv bits, plot red/green boxes for eyes on statues")
+	fmt.Fprintln(f, "_effectDark = &08 ; dark unless have torch")
+	fmt.Fprintln(f)
+	fmt.Fprintln(f, "SCREEN_FLAGS_ITEM_PRESENT = &04")
+}
+
+func writePanicFooter(f *os.File) {
+
+	fmt.Fprintln(f, "; These values are per screen and copied into the zp 'snowwindow' memory on a screen change")
+	fmt.Fprintln(f, ".snowWindowValueTable:")
+	fmt.Fprintln(f, "  EQUB 12,15,26,38 ; in the cave, poor lake, east tower, west tower")
+	fmt.Fprintln(f, "  EQUB 0")
+	fmt.Fprintln(f)
+	fmt.Fprintln(f, ".snowWindowValues:")
+	fmt.Fprintln(f, "  EQUB 16*4, 16*0, 16*7, 16*7 ; In the cave")
+	fmt.Fprintln(f, "  EQUB 16*4, 16*0, 16*8, 16*5 ; Poor lake")
+	fmt.Fprintln(f, "  EQUB 0, 16*0, 16*8, 16*5    ; Top of east tower")
+	fmt.Fprintln(f, "  EQUB 0, 0, 128, (16*8)-8    ; Top of west tower")
+	fmt.Fprintln(f)
+	fmt.Fprintln(f, ".endLevelData:")
+	fmt.Fprintln(f, "  PRINT \"Level data takes \", P%-mapData")
 }
