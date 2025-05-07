@@ -37,17 +37,20 @@ func panicParseTileFlags(filename string) error {
 
 func panicGetFlagsForTile(tileID byte) byte {
 
-	// Just for now, these are eventually read out of the files above
-	if tileID == 1 {
+	// Take 1 off, then or the flags in
+	tileID = tileID - 1
+	flags := byte(0)
 
-		return _bitClimbable
-	} else if tileID == 3 {
+	// Just for now, these will eventually be read out of the files above
+	if tileID == 0 {
 
-		return _bitCollidable
-	} else {
+		flags = _bitClimbable
+	} else if tileID == 2 {
 
-		return 0
+		flags = _bitCollidable
 	}
+
+	return tileID | flags
 }
 
 // Pack a row of screen bytes
@@ -61,7 +64,7 @@ func panicGetFlagsForTile(tileID byte) byte {
 // Or a normal tile index:
 //                 0x00 - 0x1f
 
-func packLine(b []byte) ([]byte, error) {
+func packLine(b []byte, includeFlags bool) ([]byte, error) {
 
 	if len(b) != 8 {
 
@@ -109,13 +112,29 @@ loop:
 
 			for range rleCnt {
 
+				if includeFlags {
+
+					currentByte = panicGetFlagsForTile(currentByte)
+				}
+
 				r = append(r, currentByte)
 			}
 		}
 	} else {
 
+		if currentByte == 0 {
+
+			return nil, errors.New("unexpected byte")
+		}
+
 		// output 0xf | rleCnt plus the byte itself
 		r = append(r, byte(0xf0|rleCnt))
+
+		if includeFlags {
+
+			currentByte = panicGetFlagsForTile(currentByte)
+		}
+
 		r = append(r, currentByte)
 	}
 

@@ -140,14 +140,7 @@ func exportMap(mapfile string, outfile string, packed bool) error {
 
 			if packed {
 
-				for i, j := range rowBytes {
-
-					// or in the flags?
-					flags := panicGetFlagsForTile(j)
-					rowBytes[i] |= flags
-				}
-
-				packedRowBytes, err := packLine(rowBytes)
+				packedRowBytes, err := packLine(rowBytes, true)
 
 				if err != nil {
 
