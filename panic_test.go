@@ -7,14 +7,14 @@ import (
 
 func TestNilOrBadSlice(t *testing.T) {
 
-	_, err := packLine(nil, false)
+	_, err := panicPackLine(nil, false)
 
 	if err == nil {
 
 		t.Errorf("Expected error")
 	}
 
-	_, err = packLine(make([]byte, 1), false)
+	_, err = panicPackLine(make([]byte, 1), false)
 
 	if err == nil {
 
@@ -26,7 +26,7 @@ func TestNilOrBadSlice(t *testing.T) {
 func TestAllZeroSlice(t *testing.T) {
 
 	expected := make([]byte, 1)
-	got, err := packLine(make([]byte, 8), false)
+	got, err := panicPackLine(make([]byte, 8), false)
 
 	if err != nil {
 
@@ -73,7 +73,7 @@ func TestRunLength(t *testing.T) {
 
 	for i, _ := range tests {
 
-		got, err := packLine(tests[i], false)
+		got, err := panicPackLine(tests[i], false)
 
 		if err != nil {
 
