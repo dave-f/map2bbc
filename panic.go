@@ -228,10 +228,10 @@ func panicGetFlagsForTile(tileID byte) byte {
 	flags := byte(0)
 
 	// Just for now, these will eventually be read out of the files above
-	if tileID == 0 {
+	if tileID == 0 || tileID == 19 {
 
 		flags = _bitClimbable
-	} else if tileID == 2 {
+	} else if tileID == 2 || tileID == 8 || tileID == 17 {
 
 		flags = _bitCollidable
 	}
@@ -367,6 +367,62 @@ func panicWriteFooter(f *os.File) {
 	fmt.Fprintln(f, "  PRINT \"Level data takes \", P%-mapData")
 }
 
+// TODO: the screens are 1+ at the moment to account for the title page
+func panicGetExitBytes(s PanicScreen) ([]byte, error) {
+
+	bytes := make([]byte, 4)
+
+	if s.ExitUp {
+
+		newScreen, err := panicGetScreenNoFromGridPos(s.GridX, s.GridY-1)
+
+		if err != nil {
+
+			return bytes, err
+		}
+
+		bytes[0] = byte(newScreen) + 1
+	}
+
+	if s.ExitDown {
+
+		newScreen, err := panicGetScreenNoFromGridPos(s.GridX, s.GridY+1)
+
+		if err != nil {
+
+			return bytes, err
+		}
+
+		bytes[1] = byte(newScreen) + 1
+	}
+
+	if s.ExitRight {
+
+		newScreen, err := panicGetScreenNoFromGridPos(s.GridX+1, s.GridY)
+
+		if err != nil {
+
+			return bytes, err
+		}
+
+		bytes[2] = byte(newScreen) + 1
+	}
+
+	if s.ExitLeft {
+
+		newScreen, err := panicGetScreenNoFromGridPos(s.GridX-1, s.GridY)
+
+		if err != nil {
+
+			return bytes, err
+		}
+
+		bytes[3] = byte(newScreen) + 1
+	}
+
+	return bytes, nil
+}
+
 // Export the map in Mountain Panic leveldata.asm format
 func panicExport(mapfile string, outfile string) error {
 
@@ -411,9 +467,16 @@ func panicExport(mapfile string, outfile string) error {
 
 	totalScreens := panicGetTotalScreens()
 
-	fmt.Fprintln(f, "NUM_SCREENS =", totalScreens)
+	fmt.Fprintln(f, "NUM_SCREENS =", totalScreens+1)
 	fmt.Fprintln(f)
 	fmt.Fprintln(f, ".mapData:")
+
+	fmt.Fprintln(f, "  ; Screen 00 : title page")
+	fmt.Fprintln(f, "  EQUB &00")
+	fmt.Fprintln(f, "  EQUB &00")
+	fmt.Fprintln(f, "  EQUB &00")
+	fmt.Fprintln(f, "  EQUB &00,&00,&00,&00")
+	fmt.Fprintln(f, "  EQUB &00")
 
 	for i := range totalScreens {
 
@@ -424,29 +487,27 @@ func panicExport(mapfile string, outfile string) error {
 			return err
 		}
 
-		fmt.Fprintf(f, "  ; Screen %02d : %s\n", i, s.Name)
-		fmt.Fprintln(f, "  EQUB &00")
-		fmt.Fprintln(f, "  EQUB &00")
-		fmt.Fprintln(f, "  EQUB &00")
-		fmt.Fprintln(f, "  EQUB &00,&00, &00, &00")
-		fmt.Fprintln(f, "  EQUB &00")
-	}
+		eb, err := panicGetExitBytes(s)
 
-	/* TODO this is getting exits
-	sid, err := panicGetScreenNoFromGridPos(130, 127)
-
-	if err != nil {
-
-		return err
-	} else {
-
-		s, err := panicGetScreen(sid)
 		if err != nil {
+
 			return err
 		}
-		fmt.Println("Centre is", s.Name)
+
+		si, err := panicGetScreenNoFromGridPos(s.GridX, s.GridY)
+
+		if err != nil {
+
+			return err
+		}
+
+		fmt.Fprintf(f, "  ; Screen %02d : %s\n", 1+i, s.Name)
+		fmt.Fprintln(f, "  EQUB &00")
+		fmt.Fprintf(f, "  EQUB &%02X\n", si)
+		fmt.Fprintln(f, "  EQUB &00")
+		fmt.Fprintf(f, "  EQUB &%02X,&%02X,&%02X,&%02X\n", eb[0], eb[1], eb[2], eb[3])
+		fmt.Fprintln(f, "  EQUB &00")
 	}
-	*/
 
 	fmt.Fprintln(f)
 	fmt.Fprintln(f, ".screenTable:")

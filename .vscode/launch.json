@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}",
-            "args":["-p","C:/Dev/panic2/map/panic2.world","C:/Dev/panic2/leveldata-test.asm"]
+            "args":["-p","C:/Dev/panic2/map/panic2.world","C:/Dev/panic2/leveldata-exported.asm"]
         }
     ]
 }
