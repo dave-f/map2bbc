@@ -87,8 +87,16 @@ func panicParseScreen(filename string) (PanicScreen, error) {
 		r.TileIndexes = append(r.TileIndexes, make([]byte, 0))
 	}
 
+	// Get the map
+	tileLayerData, err := m.GetMapBaseLayer()
+
+	if err != nil {
+
+		return r, err
+	}
+
 	// The CSV reader expects no ',' at the end of a line, so remove those
-	trimmed := strings.ReplaceAll(m.Data, ",\n", "\n")
+	trimmed := strings.ReplaceAll(tileLayerData, ",\n", "\n")
 	reader := csv.NewReader(strings.NewReader(trimmed))
 	records, err := reader.ReadAll()
 	rowCount := 0
